@@ -16,7 +16,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# The base image's pip is outside requirements.txt. Upgrade it before
+# installing the app so the image does not keep a pip with the tar-extraction
+# advisories fixed in 26.2.1 (GHSA-4xh5-x5gv-qwph and follow-ups).
+RUN pip install --no-cache-dir --upgrade "pip>=26.2.1" \
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
